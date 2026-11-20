@@ -66,9 +66,6 @@
       { petal: '#ffffff', petalShade: '#f2e9f6', center: '#ffce54', centerDeep: '#e08e1f' },
       { petal: '#ffe1ef', petalShade: '#ffc9de', center: '#ffce54', centerDeep: '#e08e1f' }
     ],
-    sunflower: [
-      { petal: '#ffd93d', petalShade: '#f4b400', center: '#6b3f1d', centerDeep: '#40230f' }
-    ],
     poppy: [
       { petal: '#ff4d5e', petalShade: '#d81f3a', center: '#2b0f1a', centerDeep: '#150609' },
       { petal: '#ff7a3d', petalShade: '#e6551b', center: '#2b0f1a', centerDeep: '#150609' }
@@ -79,8 +76,9 @@
       { a: '#ff8fab', b: '#ff5c8a', c: '#e63f6d' }
     ],
     peony: [
-      { outer: '#ff9fc7', mid: '#ff6fa8', inner: '#e6357e' },
-      { outer: '#ffd0e6', mid: '#ffa6cf', inner: '#ff6fa8' }
+      { outer: '#ff9fc7', mid: '#ff6fa8', inner: '#e6357e', core: '#c2185e' },
+      { outer: '#ffd0e6', mid: '#ffa6cf', inner: '#ff6fa8', core: '#e6357e' },
+      { outer: '#dcc2ff', mid: '#b983ff', inner: '#8f5ae8', core: '#6f3fc7' }
     ],
     sakura: [
       { petal: '#ffd3e6', petalShade: '#ffb6d5', center: '#ffce54' },
@@ -99,10 +97,11 @@
     if (flowers.length >= MAX_FLOWERS) flowers.shift();
     const type = TYPES[Math.floor(Math.random() * TYPES.length)];
     const palette = PALETTES[type][Math.floor(Math.random() * PALETTES[type].length)];
+    const sizeBoost = type === 'peony' ? 1.45 : 1;
     flowers.push({
       x, y,
       type, palette,
-      size: 15 + Math.random() * 9,
+      size: (15 + Math.random() * 9) * sizeBoost,
       stemLen: 34 + Math.random() * 26,
       lean: (Math.random() - 0.5) * 0.5,
       rot: (Math.random() - 0.5) * 0.4,
@@ -181,21 +180,6 @@
     ctx.restore();
   }
 
-  function drawSunflower(ctx, size, bloom, p) {
-    ctx.save();
-    ctx.scale(bloom, bloom);
-    drawPetalRing(ctx, 16, size * 1.7, size * 0.55, p.petalShade, p.petal, 0.1);
-    drawPetalRing(ctx, 16, size * 1.25, size * 0.42, p.petalShade, p.petal, 0.1 + Math.PI / 16);
-    const g = ctx.createRadialGradient(0, 0, 0, 0, 0, size * 0.5);
-    g.addColorStop(0, p.center);
-    g.addColorStop(1, p.centerDeep);
-    ctx.fillStyle = g;
-    ctx.beginPath();
-    ctx.arc(0, 0, size * 0.48, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.restore();
-  }
-
   function drawPoppy(ctx, size, bloom, p) {
     ctx.save();
     ctx.scale(bloom, bloom);
@@ -258,9 +242,11 @@
     ctx.save();
     ctx.scale(bloom, bloom);
     const layers = [
-      { n: 10, len: size * 1.5, w: size * 0.75, col: p.outer, rot: 0 },
-      { n: 9, len: size * 1.15, w: size * 0.62, col: p.mid, rot: 0.34 },
-      { n: 7, len: size * 0.78, w: size * 0.5, col: p.inner, rot: 0.6 }
+      { n: 13, len: size * 1.6, w: size * 0.8, col: p.outer, rot: 0 },
+      { n: 12, len: size * 1.3, w: size * 0.7, col: p.outer, rot: 0.22 },
+      { n: 11, len: size * 1.02, w: size * 0.6, col: p.mid, rot: 0.42 },
+      { n: 9, len: size * 0.78, w: size * 0.5, col: p.mid, rot: 0.62 },
+      { n: 7, len: size * 0.54, w: size * 0.4, col: p.inner, rot: 0.8 }
     ];
     for (const L of layers) {
       for (let i = 0; i < L.n; i++) {
@@ -274,6 +260,10 @@
         ctx.restore();
       }
     }
+    ctx.fillStyle = p.core;
+    ctx.beginPath();
+    ctx.arc(0, 0, size * 0.22, 0, Math.PI * 2);
+    ctx.fill();
     ctx.restore();
   }
 
@@ -301,7 +291,6 @@
 
   const RENDERERS = {
     daisy: drawDaisy,
-    sunflower: drawSunflower,
     poppy: drawPoppy,
     tulip: drawTulip,
     peony: drawPeony,
